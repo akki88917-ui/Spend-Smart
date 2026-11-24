@@ -145,7 +145,7 @@ def index():
     budget_used_percent = round(min(100, (sm_expense / monthly_budget) * 100), 1) if monthly_budget > 0 else 0
 
     # --- This-month daily trend (income + expense per day) for the 1-month area chart ---
-    import calendar as _cal
+     import calendar as _cal
         daily_exp_rows = conn.execute("""
         SELECT TO_CHAR(date, 'DD') as d, SUM(amount) as total
         FROM expenses
