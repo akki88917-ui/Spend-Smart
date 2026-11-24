@@ -24,7 +24,9 @@ def index():
         reverse=True,
     )
 
-    selected = request.args.get("month", datetime.now().TO_CHAR("%Y-%m"))
+    from datetime import datetime
+  ...
+    selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
 
     sm_income = conn.execute(
         "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=%s AND TO_CHAR('%Y-%m',date)=%s",
