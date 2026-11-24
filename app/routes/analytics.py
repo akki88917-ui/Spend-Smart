@@ -13,10 +13,10 @@ def index():
     conn = get_db()
 
     income_months = conn.execute(
-        "SELECT DISTINCT TO_CHAR('%Y-%m', date) as m FROM incomes WHERE user_id=?", (uid,)
+        "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id=%s", (uid,)
     ).fetchall()
     expense_months = conn.execute(
-        "SELECT DISTINCT TO_CHAR('%Y-%m', date) as m FROM expenses WHERE user_id=?", (uid,)
+        "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM expenses WHERE user_id=%s", (uid,)
     ).fetchall()
 
     all_months = sorted(
@@ -27,12 +27,12 @@ def index():
     selected = request.args.get("month", datetime.now().TO_CHAR("%Y-%m"))
 
     sm_income = conn.execute(
-        "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=? AND TO_CHAR('%Y-%m',date)=?",
+        "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=%s AND TO_CHAR('%Y-%m',date)=%s",
         (uid, selected),
     ).fetchone()["t"]
 
     sm_expense = conn.execute(
-        "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=? AND TO_CHAR('%Y-%m',date)=?",
+        "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=%s AND TO_CHAR('%Y-%m',date)=%s",
         (uid, selected),
     ).fetchone()["t"]
 
@@ -46,7 +46,7 @@ def index():
         prev_month_str = f"{selected_dt.year}-{selected_dt.month - 1:02d}"
 
     pm_expense = conn.execute(
-        "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=? AND TO_CHAR('%Y-%m',date)=?",
+        "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=%s AND TO_CHAR('%Y-%m',date)=%s",
         (uid, prev_month_str),
     ).fetchone()["t"]
     
@@ -59,7 +59,7 @@ def index():
     cat_breakdown = conn.execute("""
         SELECT c.name, c.icon, COALESCE(SUM(e.amount),0) as total
         FROM categories c LEFT JOIN expenses e ON c.id = e.category_id
-            AND e.user_id = ? AND TO_CHAR('%Y-%m', e.date) = ?
+            AND e.user_id = %s AND TO_CHAR('%Y-%m', e.date) = %s
         GROUP BY c.id, c.name, c.icon HAVING COALESCE(SUM(e.amount),0) > 0
         ORDER BY total DESC
     """, (uid, selected)).fetchall()
@@ -67,19 +67,19 @@ def index():
     max_cat_amount = max((r["total"] for r in cat_breakdown), default=1)
 
     total_income = conn.execute(
-        "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=?", (uid,)
+        "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=%s", (uid,)
     ).fetchone()["t"]
 
     total_expense = conn.execute(
-        "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=?", (uid,)
+        "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=%s", (uid,)
     ).fetchone()["t"]
 
     total_transactions = conn.execute(
-        "SELECT COUNT(*) as c FROM expenses WHERE user_id=?", (uid,)
+        "SELECT COUNT(*) as c FROM expenses WHERE user_id=%s", (uid,)
     ).fetchone()["c"]
 
     total_cashins = conn.execute(
-        "SELECT COUNT(*) as c FROM incomes WHERE user_id=?", (uid,)
+        "SELECT COUNT(*) as c FROM incomes WHERE user_id=%s", (uid,)
     ).fetchone()["c"]
 
     # --- 4-Month trend (selected month + previous 3), gradient area chart ---
@@ -92,11 +92,11 @@ def index():
     trend_months = []
     for m in months4:
         m_in = conn.execute(
-            "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=? AND TO_CHAR('%Y-%m',date)=?",
+            "SELECT COALESCE(SUM(amount),0) as t FROM incomes WHERE user_id=%s AND TO_CHAR('%Y-%m',date)=%s",
             (uid, m),
         ).fetchone()["t"]
         m_out = conn.execute(
-            "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=? AND TO_CHAR('%Y-%m',date)=?",
+            "SELECT COALESCE(SUM(amount),0) as t FROM expenses WHERE user_id=%s AND TO_CHAR('%Y-%m',date)=%s",
             (uid, m),
         ).fetchone()["t"]
         try:
@@ -115,7 +115,7 @@ def index():
         SELECT e.description, e.amount, c.icon, c.name, e.date
         FROM expenses e
         LEFT JOIN categories c ON e.category_id = c.id
-        WHERE e.user_id = ? AND TO_CHAR('%Y-%m', e.date) = ?
+        WHERE e.user_id = %s AND TO_CHAR('%Y-%m', e.date) = %s
         ORDER BY e.amount DESC
         LIMIT 3
     """, (uid, selected)).fetchall()
@@ -124,7 +124,7 @@ def index():
     dow_expenses = conn.execute("""
         SELECT TO_CHAR('%w', date) as dow, SUM(amount) as total
         FROM expenses
-        WHERE user_id = ? AND TO_CHAR('%Y-%m', date) = ?
+        WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s
         GROUP BY TO_CHAR('%w', date)
     """, (uid, selected)).fetchall()
     
@@ -138,7 +138,7 @@ def index():
 
     ### Budget Usage ###
     budget_row = conn.execute(
-        "SELECT amount FROM budgets WHERE user_id=? AND category_id IS NULL AND month=?",
+        "SELECT amount FROM budgets WHERE user_id=%s AND category_id IS NULL AND month=%s",
         (uid, selected)
     ).fetchone()
     monthly_budget = budget_row["amount"] if budget_row else 0
@@ -149,14 +149,14 @@ def index():
     daily_exp_rows = conn.execute("""
         SELECT TO_CHAR(date, 'DD') as d, SUM(amount) as total
         FROM expenses
-        WHERE user_id = ? AND TO_CHAR(date, 'YYYY-MM') = ?
+        WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s
         GROUP BY TO_CHAR(date, 'DD')
     """, (uid, selected)).fetchall()
     daily_exp_map = {str(r["d"]): float(r["total"]) for r in daily_exp_rows}
     daily_inc_rows = conn.execute("""
         SELECT TO_CHAR('%d', date) as d, SUM(amount) as total
         FROM incomes
-        WHERE user_id=? AND TO_CHAR('%Y-%m', date)=?
+        WHERE user_id=%s AND TO_CHAR(date, 'YYYY-MM')=%s
         GROUP BY TO_CHAR('%d', date)
     """, (uid, selected)).fetchall()
     daily_inc_map = {str(r["d"]): float(r["total"]) for r in daily_inc_rows}
@@ -175,11 +175,11 @@ def index():
     cat_donut = [{"name": r["name"], "icon": r["icon"], "total": float(r["total"])} for r in cat_breakdown]
 
     # Category breakdown aggregated over the last 4 months, for the second donut
-    _ph = ",".join("?" * len(months4))
+    _ph = ",".join("%s" * len(months4))
     donut_4m_rows = conn.execute(f"""
         SELECT c.name, c.icon, COALESCE(SUM(e.amount),0) as total
         FROM categories c JOIN expenses e ON c.id = e.category_id
-        WHERE e.user_id = ? AND TO_CHAR('%Y-%m', e.date) IN ({_ph})
+        WHERE e.user_id = %s AND TO_CHAR('%Y-%m', e.date) IN ({_ph})
         GROUP BY c.id, c.name, c.icon HAVING COALESCE(SUM(e.amount),0) > 0
         ORDER BY total DESC
     """, (uid, *months4)).fetchall()
