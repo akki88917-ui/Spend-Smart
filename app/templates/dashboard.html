@@ -31,7 +31,7 @@
   <span class="alert-icon">{% if budget_used_percent >= 100 %}⚡{% else %}⚠{% endif %}</span>
   <div class="alert-body">
     <strong>{% if budget_used_percent >= 100 %}Over budget!{% else %}Approaching your budget limit.{% endif %}</strong>
-    <span>You've used <strong>{{ "%.0f"|format(budget_used_percent) }}%</strong> — ৳{{ "%.0f"|format(cm_expense) }} of ৳{{ "%.0f"|format(monthly_budget) }} this month.</span>
+    <span>You've used <strong>{{ "%.0f"|format(budget_used_percent) }}%</strong> — ₹{{ "%.0f"|format(cm_expense) }} of ₹{{ "%.0f"|format(monthly_budget) }} this month.</span>
   </div>
   <a href="#" onclick="openModal('setBudgetModal');return false" class="btn btn-ghost btn-sm">Adjust</a>
 </div>
@@ -78,30 +78,30 @@
   <div class="stat-card s-dark">
     <span class="stat-bg-icon">💰</span>
     <p class="stat-label">Total Balance</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(balance|default(0)) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(balance|default(0)) }}</h2>
     <p class="stat-trend">Lifetime net savings</p>
   </div>
   <div class="stat-card s-success">
     <span class="stat-bg-icon">📈</span>
     <p class="stat-label">Income This Month</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(cm_income|default(0)) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(cm_income|default(0)) }}</h2>
     <p class="stat-trend">Total received</p>
   </div>
   <div class="stat-card s-danger">
     <span class="stat-bg-icon">📉</span>
     <p class="stat-label">Spent This Month</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(cm_expense|default(0)) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(cm_expense|default(0)) }}</h2>
     {% if savings_diff and savings_diff > 0 %}
-    <p class="stat-trend">↑ ৳{{ "%.0f"|format(savings_diff) }} better than last month</p>
+    <p class="stat-trend">↑ ₹{{ "%.0f"|format(savings_diff) }} better than last month</p>
     {% elif savings_diff and savings_diff < 0 %}
-    <p class="stat-trend">↓ ৳{{ "%.0f"|format(savings_diff|abs) }} more than last month</p>
+    <p class="stat-trend">↓ ₹{{ "%.0f"|format(savings_diff|abs) }} more than last month</p>
     {% else %}<p class="stat-trend">Same as last month</p>{% endif %}
   </div>
   <div class="stat-card s-accent">
     <span class="stat-bg-icon">🏦</span>
     <p class="stat-label">Saved This Month</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(cm_saved|default(0)) }}</h2>
-    <p class="stat-trend">Daily avg: ৳{{ "%.0f"|format(daily_average|default(0)) }}</p>
+    <h2 class="stat-value">₹{{ "%.0f"|format(cm_saved|default(0)) }}</h2>
+    <p class="stat-trend">Daily avg: ₹{{ "%.0f"|format(daily_average|default(0)) }}</p>
   </div>
 </div>
 
@@ -119,16 +119,16 @@
       <span class="budget-status-tag bst-safe">✓ On track</span>
       {% endif %}
     </div>
-    <span class="budget-amounts">৳{{ "%.0f"|format(cm_expense) }} / ৳{{ "%.0f"|format(monthly_budget) }}</span>
+    <span class="budget-amounts">₹{{ "%.0f"|format(cm_expense) }} / ₹{{ "%.0f"|format(monthly_budget) }}</span>
   </div>
   <div class="progress-bar-bg">
     <div class="progress-fill {% if budget_used_percent > 90 %}p-danger{% elif budget_used_percent > 75 %}p-warning{% else %}p-success{% endif %}"
          style="width:{{ [budget_used_percent, 100]|min }}%"></div>
   </div>
   <div class="budget-meta">
-    <span>Safe daily spend: <strong style="color:var(--ink)">৳{{ "%.0f"|format(safe_to_spend_daily) }}/day</strong>
+    <span>Safe daily spend: <strong style="color:var(--ink)">₹{{ "%.0f"|format(safe_to_spend_daily) }}/day</strong>
       &nbsp;·&nbsp; <strong style="color:var(--ink)">{{ "%.1f"|format(budget_used_percent) }}%</strong> used
-      &nbsp;·&nbsp; Projected: ৳{{ "%.0f"|format(projected_spend) }}
+      &nbsp;·&nbsp; Projected: ₹{{ "%.0f"|format(projected_spend) }}
     </span>
     <a href="#" onclick="openModal('setBudgetModal');return false">Update →</a>
   </div>
@@ -156,8 +156,8 @@
            style="width:{{ [cb.percent, 100]|min }}%"></div>
     </div>
     <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--ink-3);margin-top:0.375rem">
-      <span>৳{{ "%.0f"|format(cb.spent) }} spent</span>
-      <span>of ৳{{ "%.0f"|format(cb.budget) }}</span>
+      <span>₹{{ "%.0f"|format(cb.spent) }} spent</span>
+      <span>of ₹{{ "%.0f"|format(cb.budget) }}</span>
     </div>
   </div>
   {% endfor %}
@@ -168,12 +168,12 @@
 {% if cm_income > 0 and cm_expense > cm_income %}
 <div class="insight-box warn" style="margin-bottom:1.5rem">
   <span class="insight-icon">⚠</span>
-  <span>Spending <strong>৳{{ "%.0f"|format(cm_expense - cm_income) }}</strong> more than income this month. Review your expenses.</span>
+  <span>Spending <strong>₹{{ "%.0f"|format(cm_expense - cm_income) }}</strong> more than income this month. Review your expenses.</span>
 </div>
 {% elif daily_average > 0 and projected_spend > monthly_budget and monthly_budget > 0 %}
 <div class="insight-box" style="margin-bottom:1.5rem">
   <span class="insight-icon">💡</span>
-  <span>At this pace you'll spend <strong>৳{{ "%.0f"|format(projected_spend) }}</strong> this month — <strong>৳{{ "%.0f"|format(projected_spend - monthly_budget) }}</strong> over budget.</span>
+  <span>At this pace you'll spend <strong>₹{{ "%.0f"|format(projected_spend) }}</strong> this month — <strong>₹{{ "%.0f"|format(projected_spend - monthly_budget) }}</strong> over budget.</span>
 </div>
 {% endif %}
 
@@ -196,14 +196,14 @@
             <td style="color:var(--ink-3);font-size:0.8rem;font-weight:500">{{ e.date|format_date }}</td>
             <td><span class="cat-pill">{{ e.category_icon }} {{ e.category_name }}</span></td>
             <td style="color:var(--ink-3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.description or '—' }}</td>
-            <td class="text-right amount-out">− ৳{{ "%.2f"|format(e.amount) }}</td>
+            <td class="text-right amount-out">− ₹{{ "%.2f"|format(e.amount) }}</td>
             <td class="text-right actions-cell">
               <button class="action-btn edit-btn" data-id="{{ e.id }}" data-date="{{ e.date|format_date }}"
                 data-catid="{{ e.category_id|default('') }}" data-amount="{{ e.amount }}" data-desc="{{ e.description or '' }}"
                 onclick="openExpenseModal(this)">✏</button>
               <button class="action-btn delete-btn"
                 data-url="{{ url_for('transactions.delete_expense', id=e.id) }}"
-                data-msg="Delete ৳{{ '%.2f'|format(e.amount) }} ({{ e.category_name }})?"
+                data-msg="Delete ₹{{ '%.2f'|format(e.amount) }} ({{ e.category_name }})?"
                 onclick="openDeleteModal(this)">✕</button>
             </td>
           </tr>
@@ -231,14 +231,14 @@
           <tr>
             <td style="color:var(--ink-3);font-size:0.8rem;font-weight:500">{{ i.date|format_date }}</td>
             <td style="font-weight:500">{{ i.description }}</td>
-            <td class="text-right amount-in">+ ৳{{ "%.2f"|format(i.amount) }}</td>
+            <td class="text-right amount-in">+ ₹{{ "%.2f"|format(i.amount) }}</td>
             <td class="text-right actions-cell">
               <button class="action-btn edit-btn" data-id="{{ i.id }}" data-date="{{ i.date|format_date }}"
                 data-amount="{{ i.amount }}" data-desc="{{ i.description or '' }}"
                 onclick="openIncomeModal(this)">✏</button>
               <button class="action-btn delete-btn"
                 data-url="{{ url_for('transactions.delete_income', id=i.id) }}"
-                data-msg="Delete ৳{{ '%.2f'|format(i.amount) }} income?"
+                data-msg="Delete ₹{{ '%.2f'|format(i.amount) }} income?"
                 onclick="openDeleteModal(this)">✕</button>
             </td>
           </tr>
@@ -269,7 +269,7 @@
           background:{% if loop.index == 1 %}var(--grad-accent){% elif loop.index == 2 %}var(--grad-emerald){% elif loop.index == 3 %}var(--grad-blue){% else %}linear-gradient(90deg,#7c3aed,#8b5cf6){% endif %}">
         </div>
       </div>
-      <div class="cat-amount">৳{{ "%.0f"|format(c.total) }}</div>
+      <div class="cat-amount">₹{{ "%.0f"|format(c.total) }}</div>
     </div>
     {% endfor %}
   </div>
@@ -302,7 +302,7 @@
             <option value="">Select category</option>
             {% for c in categories %}<option value="{{ c.id }}">{{ c.icon }} {{ c.name }}</option>{% endfor %}
           </select></div>
-        <div class="form-group"><label>Amount (৳)</label>
+        <div class="form-group"><label>Amount (₹)</label>
           <input type="number" step="0.01" name="amount" class="form-input" placeholder="0.00" required min="0.01"></div>
         <div class="form-group" style="margin-bottom:0"><label>Note <span style="color:var(--ink-4);font-weight:400">(optional)</span></label>
           <input type="text" name="description" class="form-input" placeholder="e.g. Lunch, Wifi bill" autocomplete="off"></div>
@@ -328,7 +328,7 @@
       <form action="{{ url_for('transactions.cash_in') }}" method="POST" class="dash-form" id="addIncomeForm">
         <div class="form-group"><label>Date</label>
           <input type="date" name="date" class="form-input" required value="{{ current_date }}"></div>
-        <div class="form-group"><label>Amount (৳)</label>
+        <div class="form-group"><label>Amount (₹)</label>
           <input type="number" step="0.01" name="amount" class="form-input" placeholder="0.00" required min="0.01"></div>
         <div class="form-group" style="margin-bottom:0"><label>Source</label>
           <select name="description" class="form-input" required>
@@ -364,7 +364,7 @@
             <option value="">— Total Monthly Budget —</option>
             {% for c in categories %}<option value="{{ c.id }}">{{ c.icon }} {{ c.name }}</option>{% endfor %}
           </select></div>
-        <div class="form-group" style="margin-bottom:0"><label>Amount (৳)</label>
+        <div class="form-group" style="margin-bottom:0"><label>Amount (₹)</label>
           <input type="number" step="0.01" name="amount" class="form-input" placeholder="e.g. 15000" required></div>
         <p style="font-size:0.78rem;color:var(--ink-3);margin-top:0.625rem">Applies to {{ curr_month_label }}.</p>
       </form>
@@ -391,7 +391,7 @@
             <option value="">Select category</option>
             {% for c in categories %}<option value="{{ c.id }}">{{ c.icon }} {{ c.name }}</option>{% endfor %}
           </select></div>
-        <div class="form-group"><label>Amount (৳)</label>
+        <div class="form-group"><label>Amount (₹)</label>
           <input type="number" step="0.01" id="edit_exp_amount" name="amount" class="form-input" required></div>
         <div class="form-group" style="margin-bottom:0"><label>Note</label>
           <input type="text" id="edit_exp_desc" name="description" class="form-input" autocomplete="off"></div>
@@ -417,7 +417,7 @@
       <form id="editIncomeForm" method="POST" class="dash-form">
         <div class="form-group"><label>Date</label>
           <input type="date" id="edit_inc_date" name="date" class="form-input" required></div>
-        <div class="form-group"><label>Amount (৳)</label>
+        <div class="form-group"><label>Amount (₹)</label>
           <input type="number" step="0.01" id="edit_inc_amount" name="amount" class="form-input" required></div>
         <div class="form-group" style="margin-bottom:0"><label>Source</label>
           <select id="edit_inc_desc" name="description" class="form-input" required>
