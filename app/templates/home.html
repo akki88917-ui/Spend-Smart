@@ -16,7 +16,7 @@
   <span class="alert-icon">{% if budget_used_percent >= 100 %}⚡{% else %}⚠{% endif %}</span>
   <div class="alert-body">
     <strong>{% if budget_used_percent >= 100 %}You're over budget this month.{% else %}You're close to your monthly budget.{% endif %}</strong>
-    <span>You've used <strong>{{ "%.0f"|format(budget_used_percent) }}%</strong> — ৳{{ "%.0f"|format(cm_expense) }} of ৳{{ "%.0f"|format(monthly_budget) }}.</span>
+    <span>You've used <strong>{{ "%.0f"|format(budget_used_percent) }}%</strong> — ₹{{ "%.0f"|format(cm_expense) }} of ₹{{ "%.0f"|format(monthly_budget) }}.</span>
   </div>
   <a href="{{ url_for('dashboard.index') }}" class="btn btn-ghost btn-sm">Review →</a>
 </div>
@@ -27,25 +27,25 @@
   <div class="stat-card s-dark">
     <span class="stat-bg-icon">💰</span>
     <p class="stat-label">Total Balance</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(balance) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(balance) }}</h2>
     <p class="stat-trend">Lifetime net savings</p>
   </div>
   <div class="stat-card s-success">
     <span class="stat-bg-icon">📈</span>
     <p class="stat-label">Income This Month</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(cm_income) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(cm_income) }}</h2>
     <p class="stat-trend">Received in {{ curr_month_label }}</p>
   </div>
   <div class="stat-card s-danger">
     <span class="stat-bg-icon">📉</span>
     <p class="stat-label">Spent This Month</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(cm_expense) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(cm_expense) }}</h2>
     <p class="stat-trend">{% if monthly_budget > 0 %}{{ "%.0f"|format(budget_used_percent) }}% of budget{% else %}No budget set{% endif %}</p>
   </div>
   <div class="stat-card s-accent">
     <span class="stat-bg-icon">🏦</span>
     <p class="stat-label">Saved This Month</p>
-    <h2 class="stat-value">৳{{ "%.0f"|format(cm_saved) }}</h2>
+    <h2 class="stat-value">₹{{ "%.0f"|format(cm_saved) }}</h2>
     <p class="stat-trend">{{ curr_month_label }}</p>
   </div>
 </div>
@@ -88,7 +88,7 @@
       <div>
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">
           <span style="font-weight:600;color:var(--ink)">{{ g.name }}</span>
-          <span style="font-size:0.8125rem;color:var(--ink-3);font-variant-numeric:tabular-nums">৳{{ "%.0f"|format(g.current) }} / ৳{{ "%.0f"|format(g.target) }}</span>
+          <span style="font-size:0.8125rem;color:var(--ink-3);font-variant-numeric:tabular-nums">₹{{ "%.0f"|format(g.current) }} / ₹{{ "%.0f"|format(g.target) }}</span>
         </div>
         <div class="goal-progress-bg">
           <div class="goal-progress-fill" style="width:{{ g.progress }}%;background:{% if g.progress >= 100 %}var(--grad-emerald){% else %}var(--grad-accent){% endif %}"></div>
@@ -117,7 +117,7 @@
           <span class="activity-date">{{ r.date|format_date }}</span>
         </div>
         <span class="{% if r.kind == 'income' %}amount-in{% else %}amount-out{% endif %}">
-          {% if r.kind == 'income' %}+{% else %}−{% endif %} ৳{{ "%.0f"|format(r.amount) }}
+          {% if r.kind == 'income' %}+{% else %}−{% endif %} ₹{{ "%.0f"|format(r.amount) }}
         </span>
       </div>
       {% endfor %}
