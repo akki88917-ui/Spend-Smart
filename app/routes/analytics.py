@@ -149,7 +149,7 @@ def index():
         daily_exp_rows = conn.execute("""
         SELECT TO_CHAR(date, 'DD') as d, SUM(amount) as total
         FROM expenses
-        WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s
+        WHERE user_id = ? AND TO_CHAR(date, 'YYYY-MM') = ?
         GROUP BY TO_CHAR(date, 'DD')
     """, (uid, selected)).fetchall()
     daily_exp_map = {str(r["d"]): float(r["total"]) for r in daily_exp_rows}
