@@ -50,8 +50,8 @@
     {# Progress #}
     <div>
       <div class="goal-amount-row">
-        <span class="goal-current">৳{{ "%.0f"|format(goal.current_amount) }}</span>
-        <span class="goal-target">of ৳{{ "%.0f"|format(goal.target_amount) }}</span>
+        <span class="goal-current">₹{{ "%.0f"|format(goal.current_amount) }}</span>
+        <span class="goal-target">of ₹{{ "%.0f"|format(goal.target_amount) }}</span>
       </div>
       <div class="goal-progress-bg" style="margin-top:0.75rem">
         <div class="goal-progress-fill"
@@ -71,9 +71,9 @@
         <div class="fund-item">
           <span class="fund-date">{{ f.added_at|format_date }}</span>
           {% if f.amount < 0 %}
-          <span class="fund-amount fund-out">− ৳{{ "%.2f"|format(f.amount|abs) }}</span>
+          <span class="fund-amount fund-out">− ₹{{ "%.2f"|format(f.amount|abs) }}</span>
           {% else %}
-          <span class="fund-amount">+ ৳{{ "%.2f"|format(f.amount) }}</span>
+          <span class="fund-amount">+ ₹{{ "%.2f"|format(f.amount) }}</span>
           {% endif %}
         </div>
         {% endfor %}
@@ -124,7 +124,7 @@
       <div class="modal-body">
         <div class="form-group"><label>Goal Name</label>
           <input type="text" name="name" class="form-input" placeholder="e.g. New Laptop, Emergency Fund" required></div>
-        <div class="form-group"><label>Target Amount (৳)</label>
+        <div class="form-group"><label>Target Amount (₹)</label>
           <input type="number" step="0.01" name="target_amount" class="form-input" placeholder="e.g. 50000" required></div>
         <div class="form-group"><label>Target Date <span style="color:var(--ink-4);font-weight:400">(optional)</span></label>
           <input type="date" name="deadline" class="form-input"></div>
@@ -147,7 +147,7 @@
       <div class="modal-body">
         <div class="form-group"><label>Goal Name</label>
           <input type="text" id="edit_goal_name" name="name" class="form-input" required></div>
-        <div class="form-group"><label>Target Amount (৳)</label>
+        <div class="form-group"><label>Target Amount (₹)</label>
           <input type="number" step="0.01" id="edit_goal_target" name="target_amount" class="form-input" required></div>
         <div class="form-group"><label>Target Date <span style="color:var(--ink-4);font-weight:400">(optional)</span></label>
           <input type="date" id="edit_goal_deadline" name="deadline" class="form-input"></div>
@@ -171,7 +171,7 @@
     </div>
     <form id="addFundsForm" method="POST">
       <div class="modal-body">
-        <div class="form-group"><label>Amount (৳)</label>
+        <div class="form-group"><label>Amount (₹)</label>
           <input type="number" step="0.01" name="amount" class="form-input" placeholder="e.g. 500" required min="0.01"></div>
         <p style="font-size:0.8125rem;color:var(--ink-3);line-height:1.5;background:var(--accent-light);border:1px solid var(--accent-border);border-radius:8px;padding:0.625rem 0.75rem">
           Records progress toward your goal. Does not deduct from your balance.
@@ -196,7 +196,7 @@
     </div>
     <form id="withdrawFundsForm" method="POST">
       <div class="modal-body">
-        <div class="form-group"><label>Amount (৳)</label>
+        <div class="form-group"><label>Amount (₹)</label>
           <input type="number" step="0.01" name="amount" class="form-input" placeholder="e.g. 500" required min="0.01"></div>
         <p style="font-size:0.8125rem;color:var(--ink-3);line-height:1.5;background:var(--bg-2);border:1px solid var(--border);border-radius:8px;padding:0.625rem 0.75rem">
           Corrects a mistake or takes money back out. Reduces the goal's progress.
