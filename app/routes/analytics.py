@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, request
-from flask_login import login_required
+#from flask_login import login_required 
 from app.database.connection import get_db
 from datetime import datetime
 import calendar as _cal
@@ -7,11 +7,13 @@ import calendar as _cal
 analytics_bp = Blueprint('analytics', __name__)
 
 @analytics_bp.route('/analytics')
-@login_required
 def index():
     uid = session.get('user_id')
+    if not uid:
+        return redirect(url_for('auth.login'))
+        
     selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
-
+    
     conn = get_db()
 
     income_months = conn.execute("SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)).fetchall()
