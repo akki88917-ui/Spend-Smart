@@ -70,4 +70,12 @@ def index():
     conn.close()
 
     return render_template(
-        'analytics.html',
+        'analytics.html', 
+        months=months, 
+        selected=selected, 
+        income=sm_income, 
+        expense=sm_expense, 
+        daily_trend=daily_trend,
+        monthly_budget=monthly_budget,
+        budget_used_percent=budget_used_percent,
+        category_data=category_data
