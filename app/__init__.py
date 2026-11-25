@@ -1,10 +1,24 @@
 from flask import Flask, render_template, session, redirect, url_for
+from flask_login import LoginManager
 from .config import Config
 from .database.connection import close_db, ensure_schema
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    # User loader for Flask-Login
+    from app.database.connection import get_db
+    @login_manager.user_loader
+    def load_user(user_id):
+        with get_db() as conn:
+            user = conn.execute("SELECT * FROM users WHERE id = %s", (user_id,)).fetchone()
+            return user # Assuming your User object handles this
 
     # --- Static Files Optimization (Render) ---
     from whitenoise import WhiteNoise
@@ -13,11 +27,8 @@ def create_app(config_class=Config):
     # --- Jinja Filters ---
     @app.template_filter('format_date')
     def format_date_filter(value):
-        if not value:
-            return ""
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d')
-        # If it's a string, just take the date part
+        if not value: return ""
+        if hasattr(value, 'strftime'): return value.strftime('%Y-%m-%d')
         return str(value).split(' ')[0]
 
     # Register blueprints
@@ -43,7 +54,6 @@ def create_app(config_class=Config):
     app.register_blueprint(account_bp)
     app.register_blueprint(recurring_bp)
 
-    # Make sure newer tables exist on both SQLite and Postgres.
     ensure_schema(app)
 
     @app.route("/")
@@ -52,14 +62,5 @@ def create_app(config_class=Config):
             return redirect(url_for("home.index"))
         return render_template("landing.html")
 
-    @app.route("/terms")
-    def terms():
-        return render_template("terms.html")
-
-    @app.route("/health")
-    def health():
-        return "OK", 200
-
     app.teardown_appcontext(close_db)
-
     return app
