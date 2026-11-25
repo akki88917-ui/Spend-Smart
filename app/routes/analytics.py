@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, session, request
-#from flask_login import login_required 
+from flask import Blueprint, render_template, session, request, redirect, url_for
 from app.database.connection import get_db
 from datetime import datetime
 import calendar as _cal
@@ -13,7 +12,7 @@ def index():
         return redirect(url_for('auth.login'))
         
     selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
-    
+
     conn = get_db()
 
     income_months = conn.execute("SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)).fetchall()
@@ -37,6 +36,9 @@ def index():
     sm_expense_row = conn.execute("SELECT SUM(amount) as total FROM expenses WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", (uid, selected)).fetchone()
     sm_expense = float(sm_expense_row['total']) if sm_expense_row and sm_expense_row['total'] else 0.0
 
+    # Calculate savings so analytics.html doesn't throw an undefined error
+    sm_saved = sm_income - sm_expense
+
     budget_row = conn.execute("SELECT amount FROM budgets WHERE user_id = %s AND month = %s", (uid, selected)).fetchone()
     monthly_budget = float(budget_row['amount']) if budget_row and budget_row['amount'] else 0.0
     budget_used_percent = round(min(100.0, (sm_expense / monthly_budget) * 100.0), 1) if monthly_budget > 0 else 0.0
@@ -53,4 +55,11 @@ def index():
 
     conn.close()
 
-    return render_template('analytics.html', months=months, selected=selected, income=sm_income, expense=sm_expense, daily_trend=daily_trend, monthly_budget=monthly_budget, budget_used_percent=budget_used_percent, category_data=category_data)
+    return render_template(
+        'analytics.html', 
+        months=months, 
+        selected=selected, 
+        income=sm_income, 
+        expense=sm_expense, 
+        sm_saved=sm_saved,
+        daily_trend
