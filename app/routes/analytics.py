@@ -14,19 +14,12 @@ def index():
 
     conn = get_db()
 
-    # 1. Fetch distinct months for filter options
-    income_months = conn.execute(
-        "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)
-    ).fetchall()
-
-    expense_months = conn.execute(
-        "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM expenses WHERE user_id = %s", (uid,)
-    ).fetchall()
+    income_months = conn.execute("SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)).fetchall()
+    expense_months = conn.execute("SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM expenses WHERE user_id = %s", (uid,)).fetchall()
 
     months_set = {row['m'] for row in income_months if row['m']} | {row['m'] for row in expense_months if row['m']}
     months = sorted(list(months_set), reverse=True)
 
-    # 2. Daily expense trend for selected month
     daily_exp_rows = conn.execute("""
         SELECT TO_CHAR(date, 'DD') as d, SUM(amount) as total
         FROM expenses
@@ -36,27 +29,16 @@ def index():
 
     daily_trend = {row['d']: float(row['total']) for row in daily_exp_rows}
 
-    # 3. Monthly sum of income and expenses
-    sm_income_row = conn.execute(
-        "SELECT SUM(amount) as total FROM incomes WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", 
-        (uid, selected)
-    ).fetchone()
+    sm_income_row = conn.execute("SELECT SUM(amount) as total FROM incomes WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", (uid, selected)).fetchone()
     sm_income = float(sm_income_row['total']) if sm_income_row and sm_income_row['total'] else 0.0
 
-    sm_expense_row = conn.execute(
-        "SELECT SUM(amount) as total FROM expenses WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", 
-        (uid, selected)
-    ).fetchone()
+    sm_expense_row = conn.execute("SELECT SUM(amount) as total FROM expenses WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", (uid, selected)).fetchone()
     sm_expense = float(sm_expense_row['total']) if sm_expense_row and sm_expense_row['total'] else 0.0
 
-    # 4. Fetch budget values
-    budget_row = conn.execute(
-        "SELECT amount FROM budgets WHERE user_id = %s AND month = %s", (uid, selected)
-    ).fetchone()
+    budget_row = conn.execute("SELECT amount FROM budgets WHERE user_id = %s AND month = %s", (uid, selected)).fetchone()
     monthly_budget = float(budget_row['amount']) if budget_row and budget_row['amount'] else 0.0
     budget_used_percent = round(min(100.0, (sm_expense / monthly_budget) * 100.0), 1) if monthly_budget > 0 else 0.0
 
-    # 5. Fetch categories breakdown
     cat_rows = conn.execute("""
         SELECT c.name as category, SUM(e.amount) as total
         FROM expenses e
@@ -69,13 +51,4 @@ def index():
 
     conn.close()
 
-    return render_template(
-        'analytics.html', 
-        months=months, 
-        selected=selected, 
-        income=sm_income, 
-        expense=sm_expense, 
-        daily_trend=daily_trend,
-        monthly_budget=monthly_budget,
-        budget_used_percent=budget_used_percent,
-        
+    return render_template('analytics.html', months=months, selected=selected, income=sm_income, expense=sm_expense, daily_trend=daily_trend, monthly_budget=monthly_budget, budget_used_percent=budget_used_percent, category_data=category_data)
