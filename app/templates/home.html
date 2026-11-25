@@ -63,11 +63,7 @@
     <span class="quick-label">Savings goals</span>
     <span class="quick-desc">{{ goal_count }} active goal{{ '' if goal_count == 1 else 's' }}</span>
   </a>
-  <a href="{{ url_for('analytics.index') }}" class="quick-card">
-    <span class="quick-icon" style="background:#eff6ff;color:#3b82f6">📊</span>
-    <span class="quick-label">Analytics</span>
-    <span class="quick-desc">Trends &amp; insights</span>
-  </a>
+ 
   <a href="{{ url_for('transactions.history') }}" class="quick-card">
     <span class="quick-icon" style="background:#faf5ff;color:#8b5cf6">🗂️</span>
     <span class="quick-label">Transactions</span>
