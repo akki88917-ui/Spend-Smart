@@ -6,7 +6,7 @@ from datetime import datetime
 analytics_bp = Blueprint('analytics', __name__)
 
 @analytics_bp.route('/analytics')
-@login_required
+# @login_required
 def index():
     uid = session.get('user_id')
     selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
