@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, session, request
 from flask_login import login_required
 from app.database.connection import get_db
 from datetime import datetime
+import calendar as _cal
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -10,15 +11,14 @@ analytics_bp = Blueprint('analytics', __name__)
 def index():
     uid = session.get('user_id')
     selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
-    
-    # FIX: Get the connection object directly without 'with'
+
     conn = get_db()
-    
-    # 1. Fetch distinct months
+
+    # 1. Fetch distinct months for filter options
     income_months = conn.execute(
         "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)
     ).fetchall()
-    
+
     expense_months = conn.execute(
         "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM expenses WHERE user_id = %s", (uid,)
     ).fetchall()
@@ -26,7 +26,7 @@ def index():
     months_set = {row['m'] for row in income_months if row['m']} | {row['m'] for row in expense_months if row['m']}
     months = sorted(list(months_set), reverse=True)
 
-    # 2. Daily expense trend
+    # 2. Daily expense trend for selected month
     daily_exp_rows = conn.execute("""
         SELECT TO_CHAR(date, 'DD') as d, SUM(amount) as total
         FROM expenses
@@ -36,7 +36,7 @@ def index():
 
     daily_trend = {row['d']: float(row['total']) for row in daily_exp_rows}
 
-    # 3. Monthly sum
+    # 3. Monthly sum of income and expenses
     sm_income_row = conn.execute(
         "SELECT SUM(amount) as total FROM incomes WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", 
         (uid, selected)
@@ -49,14 +49,14 @@ def index():
     ).fetchone()
     sm_expense = float(sm_expense_row['total']) if sm_expense_row and sm_expense_row['total'] else 0.0
 
-    # 4. Budget
+    # 4. Fetch budget values
     budget_row = conn.execute(
         "SELECT amount FROM budgets WHERE user_id = %s AND month = %s", (uid, selected)
     ).fetchone()
     monthly_budget = float(budget_row['amount']) if budget_row and budget_row['amount'] else 0.0
     budget_used_percent = round(min(100.0, (sm_expense / monthly_budget) * 100.0), 1) if monthly_budget > 0 else 0.0
 
-    # 5. Categories
+    # 5. Fetch categories breakdown
     cat_rows = conn.execute("""
         SELECT c.name as category, SUM(e.amount) as total
         FROM expenses e
@@ -64,11 +64,10 @@ def index():
         WHERE e.user_id = %s AND TO_CHAR(e.date, 'YYYY-MM') = %s
         GROUP BY c.name
     """, (uid, selected)).fetchall()
+    
     category_data = {row['category']: float(row['total']) for row in cat_rows}
 
-    # IMPORTANT: Close the connection manually since we aren't using 'with'
     conn.close()
 
-    return render_template('analytics.html', months=months, selected=selected, 
-                           income=sm_income, expense=sm_expense, daily_trend=daily_trend,
-                           budget_used_percent=budget_used_percent, category_data=
+    return render_template(
+        'analytics.html',
