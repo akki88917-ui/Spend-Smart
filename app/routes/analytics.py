@@ -13,10 +13,38 @@ def index():
     selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
 
     with get_db() as conn:
-        # 1. Fetch distinct months where user has transactions
+        # 1. Fetch distinct months for navigation options
         income_months = conn.execute(
             "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)
         ).fetchall()
 
         expense_months = conn.execute(
-            "SELECT
+            "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM expenses WHERE user_id = %s", (uid,)
+        ).fetchall()
+
+        # Combine months list and remove duplicates
+        months_set = {row['m'] for row in income_months if row['m']} | {row['m'] for row in expense_months if row['m']}
+        months = sorted(list(months_set), reverse=True)
+
+        # 2. Daily expense trend for selected month
+        daily_exp_rows = conn.execute("""
+            SELECT TO_CHAR(date, 'DD') as d, SUM(amount) as total
+            FROM expenses
+            WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s
+            GROUP BY TO_CHAR(date, 'DD')
+        """, (uid, selected)).fetchall()
+
+        daily_trend = {row['d']: float(row['total']) for row in daily_exp_rows}
+
+        # 3. Monthly sum of income and expenses
+        sm_income_row = conn.execute(
+            "SELECT SUM(amount) as total FROM incomes WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", 
+            (uid, selected)
+        ).fetchone()
+        sm_income = float(sm_income_row['total']) if sm_income_row and sm_income_row['total'] else 0.0
+
+        sm_expense_row = conn.execute(
+            "SELECT SUM(amount) as total FROM expenses WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", 
+            (uid, selected)
+        ).fetchone()
+        sm_expense = float(sm_expense_row
