@@ -36,7 +36,6 @@ def index():
     sm_expense_row = conn.execute("SELECT SUM(amount) as total FROM expenses WHERE user_id = %s AND TO_CHAR(date, 'YYYY-MM') = %s", (uid, selected)).fetchone()
     sm_expense = float(sm_expense_row['total']) if sm_expense_row and sm_expense_row['total'] else 0.0
 
-    # Calculate savings so analytics.html doesn't throw an undefined error
     sm_saved = sm_income - sm_expense
 
     budget_row = conn.execute("SELECT amount FROM budgets WHERE user_id = %s AND month = %s", (uid, selected)).fetchone()
@@ -62,4 +61,8 @@ def index():
         income=sm_income, 
         expense=sm_expense, 
         sm_saved=sm_saved,
-        daily_trend
+        daily_trend=daily_trend,
+        monthly_budget=monthly_budget,
+        budget_used_percent=budget_used_percent,
+        category_data=category_data
+    )
