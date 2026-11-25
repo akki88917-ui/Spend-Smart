@@ -54,9 +54,10 @@ def index():
 
     conn.close()
 
-    return render_template(
+        return render_template(
         'analytics.html', 
         months=months, 
+        trend_months=months,   # <--- ADD THIS LINE HERE
         selected=selected, 
         income=sm_income, 
         expense=sm_expense, 
