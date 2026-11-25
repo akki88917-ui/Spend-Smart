@@ -78,4 +78,4 @@ def index():
         daily_trend=daily_trend,
         monthly_budget=monthly_budget,
         budget_used_percent=budget_used_percent,
-        category_data=category_data
+        
