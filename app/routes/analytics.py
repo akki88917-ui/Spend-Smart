@@ -1,36 +1,22 @@
-# app/routes/analytics.py
-from flask import Blueprint, request, request, session
-
-from flask import Flask, request, render_template, abort
+from flask import Blueprint, render_template, session, request
 from flask_login import login_required
 from app.database.connection import get_db
 from datetime import datetime
+import calendar as _cal
 
 analytics_bp = Blueprint('analytics', __name__)
 
 @analytics_bp.route('/analytics')
 @login_required
 def index():
-    # ------- PREPARATION -------------------------------------------------------
     uid = session.get('user_id')
-    selected_month = request.args.get('month', None)
+    selected = request.args.get("month", datetime.now().strftime("%Y-%m"))
 
-    # If month param missing → use current month (e.g. 2026-11)
-    if not selected:
-        selected = datetime.now().strftime("%Y-%m")  # <-- will be year-month
+    with get_db() as conn:
+        # 1. Fetch distinct months where user has transactions
+        income_months = conn.execute(
+            "SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as m FROM incomes WHERE user_id = %s", (uid,)
+        ).fetchall()
 
-    uid = session['user_id']
-
-    # ---------------------------------------------------------------
-    # Paste the SELECT with correct PLACEHOLDERS (%s) and PostgreSQL weekday
-    daily_exp_rows = conn.execute("""
-        SELECT strftime('%Y-%m','%Y-%m') as month_str,
-            DATE(datetime) as d
-        FROM expenses
-        WHERE user_id = ?
-        ORDER BY datetime
-    """, (uid, selected)).fetchall()
-
-    # Wrap the result for use in the template
-    total_monthly_expenses = sum[row['total'] for row in daily_exp_rows]
-   
+        expense_months = conn.execute(
+            "SELECT
